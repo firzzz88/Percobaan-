@@ -1,6 +1,5 @@
 from flask import Flask, render_template_string, request
 import requests
-import subprocess
 
 app = Flask(__name__)
 
@@ -10,7 +9,7 @@ HTML_TEMPLATES = """
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CYBER ONX - MULTI DOWNLOADER</title>
+    <title>CYBER ONX - TIKTOK DOWNLOADER</title>
     <style>
         body { background-color: #121212; color: #ffffff; font-family: 'Segoe UI', Arial, sans-serif; text-align: center; padding: 50px 20px; }
         .container { max-width: 500px; margin: 0 auto; background: #1e1e1e; padding: 30px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); border: 1px solid #ff4a4a; }
@@ -26,10 +25,10 @@ HTML_TEMPLATES = """
 <body>
     <div class="container">
         <h2>📥 CYBER ONX DOWNLOADER</h2>
-        <p>Bypass & Download Video TikTok & YouTube MP4</p>
+        <p>Bypass & Download Video TikTok Tanpa Watermark</p>
         
         <form method="POST">
-            <input type="text" name="url" placeholder="Tempel link YouTube / TikTok di sini..." required>
+            <input type="text" name="url" placeholder="Tempel link TikTok di sini..." required>
             <button type="submit">PROSES LINK</button>
         </form>
 
@@ -54,7 +53,6 @@ def index():
     if request.method == 'POST':
         url = request.form['url'].strip()
         
-        # --- JALUR 1: TIKTOK VIA API ---
         if "tiktok.com" in url:
             try:
                 api_url = f"https://www.tikwm.com/api/?url={url}"
@@ -62,34 +60,11 @@ def index():
                 if respon.get("code") == 0:
                     return render_template_string(HTML_TEMPLATES, sukses=True, judul=respon["data"]["title"][:50], download_url=respon["data"]["play"])
                 else:
-                    return render_template_string(HTML_TEMPLATES, error="Gagal mengambil video TikTok. Coba cek linknya lagi.")
+                    return render_template_string(HTML_TEMPLATES, error="Gagal mengambil data TikTok. Cek kembali link lu.")
             except Exception:
-                return render_template_string(HTML_TEMPLATES, error="Terjadi gangguan saat menghubungi server TikTok.")
-        
-        # --- JALUR 2: YOUTUBE VIA YT-DLP ---
-        elif "youtube.com" in url or "youtu.be" in url:
-            try:
-                perintah = f"yt-dlp -g -f 'b[ext=mp4]' '{url}'"
-                proses = subprocess.run(perintah, shell=True, capture_output=True, text=True)
-                
-                perintah_judul = f"yt-dlp --get-title '{url}'"
-                proses_judul = subprocess.run(perintah_judul, shell=True, capture_output=True, text=True)
-                
-                direct_url = proses.stdout.strip()
-                judul_video = proses_judul.stdout.strip() if proses_judul.returncode == 0 else "YouTube Video"
-                
-                if proses.returncode == 0 and direct_url:
-                    return render_template_string(HTML_TEMPLATES, sukses=True, judul=judul_video[:50], download_url=direct_url)
-                else:
-                    return render_template_string(HTML_TEMPLATES, error="Gagal mengambil link YouTube. Coba video lain.")
-            except Exception:
-                return render_template_string(HTML_TEMPLATES, error="Terjadi gangguan internal pada yt-dlp.")
-        
+                return render_template_string(HTML_TEMPLATES, error="Gagal bypass proteksi. Coba lagi nanti.")
         else:
-            return render_template_string(HTML_TEMPLATES, error="Link tidak didukung! Hanya bisa TikTok & YouTube.")
+            return render_template_string(HTML_TEMPLATES, error="Hanya mendukung link TikTok di server ini, Man!")
             
     return render_template_string(HTML_TEMPLATES)
-
-if __name__ == '__main__':
-    app.run(debug=True)
-           
+        
